@@ -1,6 +1,6 @@
 # README
 
-This Rails 6 API only using devise, devise-jwt is base on  
+This Rails 6 API only. Create with  devise, devise-jwt is base on  
 https://medium.com/@nandhae/2019-how-i-set-up-authentication-with-jwt-in-just-a-few-lines-of-code-with-rails-5-api-devise-9db7d3cee2c0
 
 
@@ -14,9 +14,9 @@ $ rails s
 
 ***
 
-# Note for column step
+# Note for medium column step
 
- * For STEP 3: Add the needed Gems 
+ * **For STEP 3: Add the needed Gems** 
  
  In **gemfile.rb** Change to use 
 
@@ -34,7 +34,7 @@ to  Fix devise-jwt compatible error
 
 ***
 
-* For STEP 7: Configure devise-jwt 
+* **For STEP 7: Configure devise-jwt** 
 
 After you run 
 
@@ -79,7 +79,7 @@ and then run below command. The result should the same as secret_key_generated_b
 Rails.application.credentials.config[:DEVISE_SECRET_KEY]
 ```
 
-Your code should look like to
+Finally your code should look like this
 
 ```
 config.jwt do |jwt|
