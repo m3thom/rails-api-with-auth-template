@@ -315,11 +315,11 @@ Devise.setup do |config|
     warn('DEVISE_SECRET_KEY is not provided, Auth system could not work properly.') if jwt.secret.nil?
 
     jwt.dispatch_requests = [
-        ['POST', %r{^/user/sign_in$}]
+        ['POST', %r{^/users/sign_in$}] # If you change sign_in path for devise, do not forget to change this too.
     ]
 
     jwt.revocation_requests = [
-        ['DELETE', %r{^/user/sign_out$}]
+        ['DELETE', %r{^/users/sign_out$}] # If you change sign_out path for devise, do not forget to change this too.
     ]
 
     jwt.expiration_time = 1.days.to_i
