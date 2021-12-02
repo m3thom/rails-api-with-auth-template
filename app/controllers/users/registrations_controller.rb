@@ -1,59 +1,27 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   include Users::UsersAuthenticable
 
-  respond_to :json
-
-   before_action :configure_sign_up_params, only: [:new, :create]
-   before_action :configure_account_update_params, only: [:update]
-
-  # GET /resource/sign_up
-  def new
-    render(status: :bad_request) && return if User.exists?(email: sign_up_params['email'])
-    build_resource(sign_up_params)
-    resource.save!
-    respond_with resource
-  end
-
   # POST /resource
   def create
-    super
+    build_resource(sign_up_params)
+
+    resource.save
+    if resource.persisted?
+      if resource.active_for_authentication?
+        sign_up(resource_name, resource)
+        respond_with resource
+      else
+        expire_data_after_sign_in!
+        respond_with resource
+      end
+    else
+      clean_up_passwords resource
+      set_minimum_password_length
+      respond_with resource
+    end
   end
 
-  # GET /resource/edit
-  # def edit
-  #   super
-  # end
-
-  # PUT /resource
-   def update
-     super
-   end
-
-  # DELETE /resource
-  # def destroy
-  #   super
-  # end
-
-  # GET /resource/cancel
-  # Forces the session data which is usually expired after sign
-  # in to be expired now. This is useful if the user wants to
-  # cancel oauth signing in/up in the middle of the process,
-  # removing all OAuth session data.
-  # def cancel
-  #   super
-  # end
-
-   protected
-
-   #If you have extra params to permit, append them to the sanitizer.
-   def configure_sign_up_params
-     devise_parameter_sanitizer.permit(:sign_up, keys: [:email, :password])
-   end
-
-  # If you have extra params to permit, append them to the sanitizer.
-   def configure_account_update_params
-     devise_parameter_sanitizer.permit(:account_update, keys: [:attribute])
-   end
+  protected
 
   # The path used after sign up.
   def after_sign_up_path_for(resource)
@@ -76,4 +44,13 @@ class Users::RegistrationsController < Devise::RegistrationsController
   #def current_token
   #  request.env['warden-jwt_auth.token']
   #end
+
+  private
+
+  def sign_up_params
+    params
+        .require(:user)
+        .permit(:email,
+                :password)
+  end
 end

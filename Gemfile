@@ -21,11 +21,14 @@ gem 'puma', '~> 4.1'
 gem 'bootsnap', '>= 1.4.2', require: false
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
- gem 'rack-cors', '~> 1.1.1'
+gem 'rack-cors', '~> 1.1.1'
 
-# Authentication gem
-gem 'devise', '~> 4.7.2'
-gem 'devise-jwt', '~> 0.6.0'
+# Authentication gems
+gem 'devise', '~> 4.8.0'
+gem 'devise-jwt', '~> 0.9.0'
+
+# Shim to load environment variables from .env into ENV
+gem 'dotenv-rails'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

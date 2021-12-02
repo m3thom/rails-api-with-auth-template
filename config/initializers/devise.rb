@@ -263,7 +263,7 @@ Devise.setup do |config|
   # should add them to the navigational formats lists.
   #
   # The "*/*" below is required to match Internet Explorer requests.
-   config.navigational_formats = []
+  #  config.navigational_formats = []
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
@@ -310,10 +310,9 @@ Devise.setup do |config|
   # config.sign_in_after_change_password = true
   #
   config.jwt do |jwt|
+    jwt.secret = ENV['DEVISE_SECRET_KEY']
 
-    jwt.secret = Rails.application.credentials.config[:DEVISE_SECRET_KEY]
-
-    warn('DEVISE_SECRET_KEY is not provided, Auth system can not work properly.') if jwt.secret.nil?
+    warn('DEVISE_SECRET_KEY is not provided, Auth system could not work properly.') if jwt.secret.nil?
 
     jwt.dispatch_requests = [
         ['POST', %r{^/user/sign_in$}]
@@ -325,5 +324,4 @@ Devise.setup do |config|
 
     jwt.expiration_time = 1.days.to_i
   end
-
 end

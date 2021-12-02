@@ -1,98 +1,154 @@
-# README
-
-This Rails 6 API only. Create with  devise, devise-jwt is base on  
+This Rails 6 API only. Created with devise, devise-jwt and based on  
 https://medium.com/@nandhae/2019-how-i-set-up-authentication-with-jwt-in-just-a-few-lines-of-code-with-rails-5-api-devise-9db7d3cee2c0
 
+**At your custom**
+
+- Custom mailer. https://www.truemark.dev/blog/reset-password-in-react-and-rails
+- Refresh user token. https://github.com/waiting-for-dev/devise-jwt/issues/7#issuecomment-716185500
+
+***
 
 # To Run the project
 
-```
-$ rails db:setup
-$ rails db:migrate
-$ rails s
+```bash
+rails db:setup
+
+rails db:migrate
+
+rails s
 ```
 
 ***
 
-# Note for medium column step
+# Step to create from scratch.
 
- * **For STEP 3: Add the needed Gems** 
- 
- In **gemfile.rb** Change to use 
+**STEP 1: Configure Rack Middleware**
 
-```
-gem 'devise-jwt', '~> 0.6.0'
-``` 
+`/cors.rb`
 
-Instead of 
-     
-```
-gem 'devise-jwt', '~> 0.5.8'
-```
-
-to  Fix devise-jwt compatible error
-
-***
-
-* **For STEP 7: Configure devise-jwt** 
-
-After you run 
-
-```
-$ bundle exec rake secret
+```ruby
+Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  allow do
+    origins '*'
+    resource(
+        '*',
+        headers: :any,
+        expose: ["Authorization"],
+        methods: [:get, :patch, :put, :delete, :post, :options, :show]
+    )
+  end
+end
 ```
 
-To store generated secret key in
+**STEP 2: Add the needed Gems**
 
-```
-jwt.secret = ENV['DEVISE_SECRET_KEY']
-```
+```ruby
+gem 'devise'
 
-Use this command to edit credential file (editor using now is VS Code)
+gem 'devise-jwt', '~> 0.7.0'
 
-```
-$ EDITOR="code --wait" rails credentials:edit --environment development
+gem 'dotenv-rails'
 ```
 
-After that, Editor should automatically open credential file and the file should look like this
+Then
 
-```
-DEVISE_SECRET_KEY: secret_key_generated_bye_bundle_exec_rake_secret
-``` 
-
-This command will generate credential file for separate environment (development for above command)
-so we have to change how we access secret key too
-
-
-```
-jwt.secret = Rails.application.credentials.config[:DEVISE_SECRET_KEY]
-``` 
-TIPs: You can check if DEVISE_SECRET_KEY has been setup successfully using 
-
-```
-$ rails c
+```bash
+bundle install
 ```
 
-and then run below command. The result should the same as secret_key_generated_bye_bundle_exec_rake_secret from above
+**STEP 3: Install and configure devise**
 
-```
-Rails.application.credentials.config[:DEVISE_SECRET_KEY]
+```bash
+rails generate devise:install
 ```
 
-Finally your code should look like this
+At `/config/environments/development.rb`
 
+```ruby
+config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 ```
+
+**STEP 4: Create User model**
+
+```bash
+rails generate devise User
+
+rails db:create
+
+rails db:migrate
+```
+
+**STEP 5: Create devise controllers and routes**
+
+**For controllers**
+
+Look at `app/controllers/users/registrations_controller.rb` and `app/controllers/users/sessions_controller.rb`
+for more information.
+
+**For routes**
+
+At `/routes.rb`
+
+```ruby
+Rails.application.routes.draw do
+  devise_for :users,
+             controllers: {
+                 sessions: 'users/sessions',
+                 registrations: 'users/registrations'
+             }
+end
+```
+
+**For STEP 6: Configure devise-jwt**
+
+Create `.env.development` at your project root directory
+
+```bash
+bundle exec rake secret
+```
+
+Then add it to `.env.development`
+
+```bash
+DEVISE_SECRET_KEY=SECRET_FROM_BUNDLE_EXEC_RAKE_SECRET
+```
+
+At `/devise.rb`
+
+```ruby
 config.jwt do |jwt|
-  jwt.secret = Rails.application.credentials.config[:DEVISE_SECRET_KEY]
+  jwt.secret = ENV[:DEVISE_SECRET_KEY]
   jwt.dispatch_requests = [
       ['POST', %r{^/login$}]
-    ]
-    jwt.revocation_requests = [
+  ]
+  jwt.revocation_requests = [
       ['DELETE', %r{^/logout$}]
-    ]
-  jwt.expiration_time = 5.minutes.to_i
+  ]
+  jwt.expiration_time = 5.minutes.to_i 
 end
-
 ```
 
-***
+**STEP 7: Set up a revocation strategy**
+
+```bash
+rails g model jwt_denylist jti:string:index exp:datetime
+```
+
+At `/app/models/jwt_denylist.rb` add
+
+```ruby
+class JwtDenylist < ApplicationRecord
+  include Devise::JWT::RevocationStrategies::Denylist
+
+  self.table_name = 'jwt_denylist'
+end
+```
+
+At `app/models/user.rb`
+
+```ruby
+class User < ApplicationRecord
+  devise :database_authenticatable,
+         :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
+end
+```
