@@ -117,7 +117,7 @@ At `/devise.rb`
 
 ```ruby
 config.jwt do |jwt|
-  jwt.secret = ENV[:DEVISE_SECRET_KEY]
+  jwt.secret = ENV['DEVISE_SECRET_KEY']
   jwt.dispatch_requests = [
       ['POST', %r{^/login$}]
   ]
