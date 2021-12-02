@@ -43,9 +43,9 @@ end
 **STEP 2: Add the needed Gems**
 
 ```ruby
-gem 'devise'
+gem 'devise', '~> 4.8.0'
 
-gem 'devise-jwt', '~> 0.7.0'
+gem 'devise-jwt', '~> 0.9.0'
 
 gem 'dotenv-rails'
 ```
