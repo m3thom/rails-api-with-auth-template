@@ -315,7 +315,8 @@ Devise.setup do |config|
     warn('DEVISE_SECRET_KEY is not provided, Auth system could not work properly.') if jwt.secret.nil?
 
     jwt.dispatch_requests = [
-        ['POST', %r{^/users/sign_in$}] # If you change sign_in path for devise, do not forget to change this too.
+        ['POST', %r{^/users$}], # If you change registration path for devise, do not forget to change this too.
+        ['POST', %r{^/users/sign_in$}], # If you change sign_in path for devise, do not forget to change this too.
     ]
 
     jwt.revocation_requests = [
