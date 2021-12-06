@@ -119,10 +119,11 @@ At `/devise.rb`
 config.jwt do |jwt|
   jwt.secret = ENV['DEVISE_SECRET_KEY']
   jwt.dispatch_requests = [
-      ['POST', %r{^/login$}]
+      ['POST', %r{^/users$}], # Default registration path from devise.
+      ['POST', %r{^/users/sign_in$}], # Default sign_in path from devise.
   ]
   jwt.revocation_requests = [
-      ['DELETE', %r{^/logout$}]
+      ['DELETE', %r{^/sign_out}] # Default sign_out path from devise.
   ]
   jwt.expiration_time = 5.minutes.to_i 
 end
