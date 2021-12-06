@@ -21,30 +21,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
   end
 
-  protected
-
-  # The path used after sign up.
-  def after_sign_up_path_for(resource)
-    super(resource)
-  end
-
-  # The path used after sign up for inactive accounts.
-  def after_inactive_sign_up_path_for(resource)
-    super(resource)
-  end
-
-  private
-
-  #def respond_with(resource, _opts = {})
-  #  # Return token to client to be use in future request
-  #  puts resource.inspect
-  #  render json: {id: resource.id, email: resource.email, user_token: "Bearer #{current_token}"}
-  #end
-  #
-  #def current_token
-  #  request.env['warden-jwt_auth.token']
-  #end
-
   private
 
   def sign_up_params

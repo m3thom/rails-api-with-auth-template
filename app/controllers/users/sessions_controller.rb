@@ -1,8 +1,6 @@
 class Users::SessionsController < Devise::SessionsController
   include Users::UsersAuthenticable
 
-  skip_before_action :verify_signed_out_user
-
   before_action :configure_sign_in_params, only: [:create]
 
   # GET /resource/sign_in
