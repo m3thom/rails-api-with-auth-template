@@ -120,6 +120,14 @@ Then add it to `.env.development`
 DEVISE_SECRET_KEY=SECRET_FROM_BUNDLE_EXEC_RAKE_SECRET
 ```
 
+Prevent credentials push at `.gitignore`
+```
+# Credentials with dot-env
+.env*
+!.env.template
+```
+
+
 At `/devise.rb`
 
 ```ruby
