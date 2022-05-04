@@ -131,6 +131,10 @@ end
 
 **STEP 7: Set up a revocation strategy**
 
+For more info https://github.com/waiting-for-dev/devise-jwt
+
+`Option 1 :`
+
 ```bash
 rails g model jwt_denylist jti:string:index exp:datetime
 ```
@@ -150,6 +154,49 @@ At `app/models/user.rb`
 ```ruby
 class User < ApplicationRecord
   devise :database_authenticatable,
-         :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
+         :jwt_authenticatable, 
+         jwt_revocation_strategy: JwtDenylist
+end
+```
+
+`Option 2 :`
+
+```bash
+rails g migration create_allowlisted_jwts
+```
+
+At generated `_create_allowlisted_jwts.rb` migration file
+
+```ruby
+def change
+  create_table :allowlisted_jwts do |t|
+    t.string :jti, null: false
+    t.string :aud
+    # If you want to leverage the `aud` claim, add to it a `NOT NULL` constraint:
+    # t.string :aud, null: false
+    t.datetime :exp, null: false
+    t.references :users, foreign_key: { on_delete: :cascade }, null: false
+  end
+
+  add_index :allowlisted_jwts, :jti, unique: true
+end
+```
+
+Create `allowlisted_jwt.rb` model
+
+```ruby
+class AllowlistedJwt < ApplicationRecord
+end
+```
+
+At `user.rb` model
+
+```ruby
+class User < ApplicationRecord
+  include Devise::JWT::RevocationStrategies::Allowlist
+
+  devise :database_authenticatable,
+         :jwt_authenticatable, 
+         jwt_revocation_strategy: self # Use created strategy
 end
 ```
