@@ -82,7 +82,14 @@ rails db:migrate
 
 **For controllers**
 
-Look at `app/controllers/users/registrations_controller.rb` and `app/controllers/users/sessions_controller.rb`
+Look at
+
+`app/controllers/concerns/users/users_authenticable.rb`
+
+`app/controllers/users/registrations_controller.rb` 
+
+`app/controllers/users/sessions_controller.rb`
+
 for more information.
 
 **For routes**
@@ -116,16 +123,37 @@ DEVISE_SECRET_KEY=SECRET_FROM_BUNDLE_EXEC_RAKE_SECRET
 At `/devise.rb`
 
 ```ruby
-config.jwt do |jwt|
-  jwt.secret = ENV['DEVISE_SECRET_KEY']
-  jwt.dispatch_requests = [
-      ['POST', %r{^/users$}], # Default registration path from devise.
-      ['POST', %r{^/users/sign_in$}], # Default sign_in path from devise.
-  ]
-  jwt.revocation_requests = [
-      ['DELETE', %r{^/sign_out}] # Default sign_out path from devise.
-  ]
-  jwt.expiration_time = 5.minutes.to_i 
+
+class CustomDeviseFailure < Devise::FailureApp
+  def respond
+    http_auth
+  end
+end
+
+Devise.setup do |config|
+  # .
+  # .
+  # .
+  
+  config.warden do |manager|
+    # Response with status code(401, 404, etc.) instead of redirect the user.
+    manager.failure_app = CustomDeviseFailure
+  end
+  
+  config.jwt do |jwt|
+    jwt.secret = ENV['DEVISE_SECRET_KEY']
+    jwt.dispatch_requests = [
+        ['POST', %r{^/users$}], # Default registration path from devise.
+        ['POST', %r{^/users/sign_in$}], # Default sign_in path from devise.
+    ]
+    jwt.revocation_requests = [
+        ['DELETE', %r{^/sign_out}] # Default sign_out path from devise.
+    ]
+    jwt.expiration_time = 5.minutes.to_i
+  end
+  # .
+  # .
+  # .
 end
 ```
 
